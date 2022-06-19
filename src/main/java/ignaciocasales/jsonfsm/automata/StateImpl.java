@@ -6,16 +6,16 @@ import java.util.List;
 /**
  * State in a finite state machine.
  */
-public final class RtState implements State {
+public final class StateImpl implements State {
 
     private List<Transition> transitions;
     private boolean isFinal;
 
-    public RtState() {
+    public StateImpl() {
         this(false);
     }
     
-    public RtState(final boolean isFinal) {
+    public StateImpl(final boolean isFinal) {
         this.transitions = new ArrayList<>();
         this.isFinal = isFinal;
     }

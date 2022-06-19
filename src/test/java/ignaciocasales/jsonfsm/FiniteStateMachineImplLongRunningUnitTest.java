@@ -1,15 +1,11 @@
 package ignaciocasales.jsonfsm;
 
 import ignaciocasales.jsonfsm.automata.FiniteStateMachine;
-import ignaciocasales.jsonfsm.automata.RtFiniteStateMachine;
-import ignaciocasales.jsonfsm.automata.RtState;
-import ignaciocasales.jsonfsm.automata.RtTransition;
-import ignaciocasales.jsonfsm.automata.State;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public final class RtFiniteStateMachineLongRunningUnitTest {
+public final class FiniteStateMachineImplLongRunningUnitTest {
 
     @Test
     public void acceptsSimplePair() {

@@ -1,9 +1,9 @@
 package ignaciocasales.jsonfsm;
 
 import ignaciocasales.jsonfsm.automata.FiniteStateMachine;
-import ignaciocasales.jsonfsm.automata.RtFiniteStateMachine;
-import ignaciocasales.jsonfsm.automata.RtState;
-import ignaciocasales.jsonfsm.automata.RtTransition;
+import ignaciocasales.jsonfsm.automata.FiniteStateMachineImpl;
+import ignaciocasales.jsonfsm.automata.StateImpl;
+import ignaciocasales.jsonfsm.automata.TransitionImpl;
 import ignaciocasales.jsonfsm.automata.State;
 
 public final class JsonFsm {
@@ -14,34 +14,34 @@ public final class JsonFsm {
      * @return
      */
     public static FiniteStateMachine machine() {
-        State first = new RtState(); // Opening bracket
-        State second = new RtState();
-        State third = new RtState();
-        State fourth = new RtState();
-        State fifth = new RtState();
-        State sixth = new RtState();
-        State seventh = new RtState();
-        State eighth = new RtState(true);
+        State first = new StateImpl(); // Opening bracket
+        State second = new StateImpl();
+        State third = new StateImpl();
+        State fourth = new StateImpl();
+        State fifth = new StateImpl();
+        State sixth = new StateImpl();
+        State seventh = new StateImpl();
+        State eighth = new StateImpl(true);
 
-        first.with(new RtTransition("{", second));
+        first.with(new TransitionImpl("{", second));
 
-        second.with(new RtTransition("\"", third));
-        second.with(new RtTransition("}", eighth));
+        second.with(new TransitionImpl("\"", third));
+        second.with(new TransitionImpl("}", eighth));
         //Add transitions with chars 0-9 and a-z
         for (int i = 0; i < 26; i++) {
             if (i < 10) {
-                third = third.with(new RtTransition(String.valueOf(i), third));
-                sixth = sixth.with(new RtTransition(String.valueOf(i), sixth));
+                third = third.with(new TransitionImpl(String.valueOf(i), third));
+                sixth = sixth.with(new TransitionImpl(String.valueOf(i), sixth));
             }
-            third = third.with(new RtTransition(String.valueOf((char) ('a' + i)), third));
-            sixth = sixth.with(new RtTransition(String.valueOf((char) ('a' + i)), sixth));
+            third = third.with(new TransitionImpl(String.valueOf((char) ('a' + i)), third));
+            sixth = sixth.with(new TransitionImpl(String.valueOf((char) ('a' + i)), sixth));
         }
-        third.with(new RtTransition("\"", fourth));
-        fourth.with(new RtTransition(":", fifth));
-        fifth.with(new RtTransition("\"", sixth));
-        sixth.with(new RtTransition("\"", seventh));
-        seventh.with(new RtTransition(",", second));
-        seventh.with(new RtTransition("}", eighth));
-        return new RtFiniteStateMachine(first);
+        third.with(new TransitionImpl("\"", fourth));
+        fourth.with(new TransitionImpl(":", fifth));
+        fifth.with(new TransitionImpl("\"", sixth));
+        sixth.with(new TransitionImpl("\"", seventh));
+        seventh.with(new TransitionImpl(",", second));
+        seventh.with(new TransitionImpl("}", eighth));
+        return new FiniteStateMachineImpl(first);
     }
 }

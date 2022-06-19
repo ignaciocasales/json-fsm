@@ -3,7 +3,7 @@ package ignaciocasales.jsonfsm.automata;
 /**
  * Transition in finite state machine.
  */
-public final class RtTransition implements Transition {
+public final class TransitionImpl implements Transition {
 
     private final String rule;
     private final State next;
@@ -13,7 +13,7 @@ public final class RtTransition implements Transition {
      *  in order to get to the next state.
      * @param next Next state.
      */
-    public RtTransition (String rule, State next) {
+    public TransitionImpl(String rule, State next) {
         this.rule = rule;
         this.next = next;
     }
