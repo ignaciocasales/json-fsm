@@ -2,16 +2,14 @@ package ignaciocasales.jsonfsm;
 
 import ignaciocasales.jsonfsm.automata.FiniteStateMachine;
 import ignaciocasales.jsonfsm.automata.FiniteStateMachineImpl;
+import ignaciocasales.jsonfsm.automata.State;
 import ignaciocasales.jsonfsm.automata.StateImpl;
 import ignaciocasales.jsonfsm.automata.TransitionImpl;
-import ignaciocasales.jsonfsm.automata.State;
 
 public final class JsonFsm {
     /**
      * Builds a finite state machine to validate a simple
      * Json object.
-     *
-     * @return
      */
     public static FiniteStateMachine machine() {
         State first = new StateImpl(); // Opening bracket

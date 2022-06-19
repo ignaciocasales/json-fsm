@@ -7,17 +7,17 @@ public final class TransitionImpl implements Transition {
 
     private final String rule;
     private final State next;
-    
+
     /**
      * @param rule Rule that a character has to meet
-     *  in order to get to the next state.
+     *             in order to get to the next state.
      * @param next Next state.
      */
     public TransitionImpl(String rule, State next) {
         this.rule = rule;
         this.next = next;
     }
-    
+
     public State state() {
         return this.next;
     }
