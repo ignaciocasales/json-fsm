@@ -27,6 +27,11 @@ public final class StateImpl implements State {
                 .orElseThrow(() -> new IllegalStateTransitionException("Input not accepted: " + c));
     }
 
+    @Override
+    public List<Transition> transitions() {
+        return this.transitions;
+    }
+
     public boolean isFinal() {
         return this.isFinal;
     }
@@ -36,5 +41,4 @@ public final class StateImpl implements State {
         this.transitions.add(tr);
         return this;
     }
-
 }

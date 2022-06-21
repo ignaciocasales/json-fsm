@@ -4,7 +4,6 @@ package ignaciocasales.jsonfsm.automata;
  * Transition in a finite State machine.
  */
 public interface Transition {
-
     /**
      * Is the transition possible with the given character?
      *
