@@ -19,8 +19,6 @@ import java.util.regex.Pattern;
 @RestController
 public class JsonFsmController {
     private static final String EMPTY_STRING = "";
-    private static final String INVALID = "INVALID";
-    private static final String VALID = "VALID";
     private static final Pattern WHITESPACE_PATTERN = Pattern.compile("\\s");
 
     @PostMapping("/test")
