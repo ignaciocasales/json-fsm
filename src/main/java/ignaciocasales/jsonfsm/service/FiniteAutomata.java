@@ -12,7 +12,7 @@ import java.util.Objects;
 @Service
 public class FiniteAutomata {
     public Response start(final String input) {
-        State state = JsonFsm.parentObject();
+        State state = JsonFsm.mainObject();
         for (int i = 0; i < input.length(); i++) {
             final String c = String.valueOf(input.charAt(i));
             final String index = String.valueOf(i);
