@@ -3,15 +3,17 @@ package ignaciocasales.jsonfsm.controller;
 import ignaciocasales.jsonfsm.JsonFsm;
 import ignaciocasales.jsonfsm.automata.IllegalStateTransitionException;
 import ignaciocasales.jsonfsm.automata.State;
-import ignaciocasales.jsonfsm.automata.Transition;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Objects;
 import java.util.Optional;
 import java.util.regex.Pattern;
 
+@Slf4j
 @RestController
 public class JsonFsmController {
     private static final String EMPTY_STRING = "";
@@ -25,19 +27,20 @@ public class JsonFsmController {
     }
 
     @ExceptionHandler({IllegalStateTransitionException.class})
-    public String handleException() {
+    public String handleException(final RuntimeException ex) {
+        log.error("Error: ", ex);
         return INVALID;
     }
 
     private static String process(final String input) {
-        State state = JsonFsm.object();
+        State state = JsonFsm.parentObject();
         for (int i = 0; i < input.length(); i++) {
             final String c = String.valueOf(input.charAt(i));
-            state = state.transitions().stream()
-                    .filter(t -> t.isPossible(c))
-                    .map(Transition::state)
+            state = state.getTransitions().stream()
+                    .map(transition -> transition.apply(c))
+                    .filter(Objects::nonNull)
                     .findAny()
-                    .orElseThrow(() -> new IllegalStateTransitionException("Input not accepted: " + c));
+                    .orElseThrow(() -> new IllegalStateTransitionException(c));
         }
         return state.isFinal() ? VALID : INVALID;
     }

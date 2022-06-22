@@ -1,26 +1,30 @@
 package ignaciocasales.jsonfsm.automata;
 
+import lombok.Getter;
+
+import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
 
 /**
- * State. Part of a finite state machine.
+ * State in a finite state machine.
  */
-public interface State {
-    /**
-     * Add a Transition to this state.
-     */
-    State with(final Transition tr);
+@Getter
+public final class State {
+    private final List<Function<String, State>> transitions;
+    private final boolean isFinal;
 
-    /**
-     * Follow one of the transitions, to get
-     * to the next state.
-     */
-    State transit(final CharSequence c);
+    public State() {
+        this(false);
+    }
 
-    List<Transition> transitions();
+    public State(final boolean isFinal) {
+        this.transitions = new ArrayList<>();
+        this.isFinal = isFinal;
+    }
 
-    /**
-     * Can the automaton stop on this state?
-     */
-    boolean isFinal();
+    public State with(Function<String, State> tr) {
+        this.transitions.add(tr);
+        return this;
+    }
 }
