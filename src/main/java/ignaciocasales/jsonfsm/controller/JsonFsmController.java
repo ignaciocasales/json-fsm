@@ -3,6 +3,8 @@ package ignaciocasales.jsonfsm.controller;
 import ignaciocasales.jsonfsm.JsonFsm;
 import ignaciocasales.jsonfsm.automata.IllegalStateTransitionException;
 import ignaciocasales.jsonfsm.automata.State;
+import ignaciocasales.jsonfsm.dto.Response;
+import ignaciocasales.jsonfsm.mapper.ResponseMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -22,27 +24,27 @@ public class JsonFsmController {
     private static final Pattern WHITESPACE_PATTERN = Pattern.compile("\\s");
 
     @PostMapping("/test")
-    public String method(@RequestBody final String input) {
+    public Response method(@RequestBody final String input) {
         return process(sanitize(input));
     }
 
     @ExceptionHandler({IllegalStateTransitionException.class})
-    public String handleException(final RuntimeException ex) {
-        log.error("Error: ", ex);
-        return INVALID;
+    public Response handleException(final IllegalStateTransitionException ex) {
+        return ResponseMapper.invalid(ex.getCharacter(), ex.getIndex());
     }
 
-    private static String process(final String input) {
+    private static Response process(final String input) {
         State state = JsonFsm.parentObject();
         for (int i = 0; i < input.length(); i++) {
             final String c = String.valueOf(input.charAt(i));
+            final String index = String.valueOf(i);
             state = state.getTransitions().stream()
                     .map(transition -> transition.apply(c))
                     .filter(Objects::nonNull)
                     .findAny()
-                    .orElseThrow(() -> new IllegalStateTransitionException(c));
+                    .orElseThrow(() -> new IllegalStateTransitionException(c, index));
         }
-        return state.isFinal() ? VALID : INVALID;
+        return state.isFinal() ? ResponseMapper.valid() : ResponseMapper.invalid();
     }
 
     private static String sanitize(final String input) {
