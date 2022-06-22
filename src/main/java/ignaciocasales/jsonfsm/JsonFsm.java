@@ -103,6 +103,9 @@ public final class JsonFsm {
             if (eq.apply(s, "{")) {
                 return innerObject(seventh);
             }
+            if (eq.apply(s, "[")) {
+                return list(seventh);
+            }
             return null;
         });
 
@@ -130,7 +133,7 @@ public final class JsonFsm {
         return first;
     }
 
-    public static State innerObject(final State s7) {
+    public static State innerObject(final State exitState) {
         final State second = new State();
         final State third = new State();
         final State fourth = new State();
@@ -147,7 +150,7 @@ public final class JsonFsm {
         second.with(s ->
         {
             if (eq.apply(s, "}")) {
-                return s7;
+                return exitState;
             }
             return null;
         });
@@ -213,6 +216,9 @@ public final class JsonFsm {
             if (eq.apply(s, "{")) {
                 return innerObject(seventh);
             }
+            if (eq.apply(s, "[")) {
+                return list(seventh);
+            }
             return null;
         });
 
@@ -232,11 +238,72 @@ public final class JsonFsm {
 
         seventh.with(s -> {
             if (eq.apply(s, "}")) {
-                return s7;
+                return exitState;
             }
             return null;
         });
 
         return second;
+    }
+
+    public static State list(final State exitState) {
+        final State first = new State();
+        final State second = new State();
+        final State third = new State();
+
+        first.with(s -> {
+            if (eq.apply(s, "\"")) {
+                return second;
+            }
+            if (eq.apply(s, "]")) {
+                return exitState;
+            }
+            return null;
+        });
+
+        //Add transitions with chars 0-9 and a-z
+        for (int i = 0; i < 26; i++) {
+            if (i < 10) {
+                final String si = String.valueOf(i);
+                second.with(s ->
+                {
+                    if (eq.apply(s, si)) {
+                        return second;
+                    }
+                    return null;
+                });
+            }
+            final String c = String.valueOf((char) ('a' + i));
+            second.with(s ->
+            {
+                if (eq.apply(s, c)) {
+                    return second;
+                }
+                return null;
+            });
+        }
+
+        second.with(s -> {
+            if (eq.apply(s, "\"")) {
+                return third;
+            }
+            return null;
+        });
+
+        third.with(s -> {
+            if (eq.apply(s, ",")) {
+                return first;
+            }
+            return null;
+        });
+
+        third.with(s -> {
+            if (eq.apply(s, "]")) {
+                return exitState;
+            }
+            return null;
+        });
+
+        return first;
     }
 }
