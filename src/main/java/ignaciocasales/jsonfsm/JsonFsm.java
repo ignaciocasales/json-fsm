@@ -3,307 +3,150 @@ package ignaciocasales.jsonfsm;
 import ignaciocasales.jsonfsm.automata.State;
 
 import java.util.function.BiFunction;
+import java.util.function.Function;
+import java.util.function.Supplier;
+import java.util.stream.IntStream;
 
+/**
+ * This class represents the states and transitions for the fsm.
+ */
+@SuppressWarnings("DuplicatedCode")
 public final class JsonFsm {
     private static final BiFunction<String, String, Boolean> eq = (s1, s2) -> s1.equalsIgnoreCase(String.valueOf(s2));
+    public static final String OPENING_BRACKET_CHAR = "{";
+    public static final String CLOSING_BRACKET_CHAR = "}";
+    public static final String QUOTE_CHAR = "\"";
+    public static final String COLON_CHAR = ":";
+    public static final String COMMA_CHAR = ",";
+    public static final String OPENING_SQUARE_BRACKET = "[";
+    public static final String CLOSING_SQUARE_BRACKET = "]";
 
-    /**
-     * Builds a finite state machine to validate a simple
-     * Json object.
-     */
-    public static State parentObject() {
-        final State first = new State();
-        final State second = new State();
-        final State third = new State();
-        final State fourth = new State();
-        final State fifth = new State();
-        final State sixth = new State();
-        final State seventh = new State();
-        final State eighth = new State(true);
+    public static State mainObject() {
+        final State first = new State(); // 1
+        final State second = new State(); // 2
+        final State third = new State(); // 3
+        final State fourth = new State(); // 4
+        final State fifth = new State(); // 5
+        final State sixth = new State(); // 6
+        final State seventh = new State(); // 7
+        final State eighth = new State(true); // 8; Accepted state.
 
-        first.with(s -> {
-            if (eq.apply(s, "{")) {
-                return second;
-            }
-            return null;
-        });
+        first.with(eqTransition(OPENING_BRACKET_CHAR, () -> second));
 
-        second.with(s -> {
-            if (eq.apply(s, "\"")) {
-                return third;
-            }
-            return null;
-        });
-        second.with(s ->
-        {
-            if (eq.apply(s, "}")) {
-                return eighth;
-            }
-            return null;
-        });
+        second.with(eqTransition(QUOTE_CHAR, () -> third))
+                .with(eqTransition(CLOSING_BRACKET_CHAR, () -> eighth));
 
-        //Add transitions with chars 0-9 and a-z
-        for (int i = 0; i < 26; i++) {
-            if (i < 10) {
-                final String si = String.valueOf(i);
-                third.with(s ->
-                {
-                    if (eq.apply(s, si)) {
-                        return third;
-                    }
-                    return null;
+        // Add transitions for 0 to 9
+        IntStream.range(0, 10)
+                .boxed()
+                .map(String::valueOf)
+                .forEach(s -> {
+                    third.with(eqTransition(s, () -> third));
+                    sixth.with(eqTransition(s, () -> sixth));
                 });
-                sixth.with(s ->
-                {
-                    if (eq.apply(s, si)) {
-                        return sixth;
-                    }
-                    return null;
+        // Add transitions for a to z
+        IntStream.range(0, 26)
+                .boxed()
+                .map(i -> String.valueOf((char) ('a' + i)))
+                .forEach(s -> {
+                    third.with(eqTransition(s, () -> third));
+                    sixth.with(eqTransition(s, () -> sixth));
                 });
-            }
-            final String c = String.valueOf((char) ('a' + i));
-            third.with(s ->
-            {
-                if (eq.apply(s, c)) {
-                    return third;
-                }
-                return null;
-            });
-            sixth.with(s ->
-            {
-                if (eq.apply(s, c)) {
-                    return sixth;
-                }
-                return null;
-            });
-        }
 
-        third.with(s -> {
-            if (eq.apply(s, "\"")) {
-                return fourth;
-            }
-            return null;
-        });
+        third.with(eqTransition(QUOTE_CHAR, () -> fourth));
 
-        fourth.with(s ->
-        {
-            if (eq.apply(s, ":")) {
-                return fifth;
-            }
-            return null;
-        });
+        fourth.with(eqTransition(COLON_CHAR, () -> fifth));
 
-        fifth.with(s -> {
-            if (eq.apply(s, "\"")) {
-                return sixth;
-            }
-            return null;
-        });
-        fifth.with(s -> {
-            if (eq.apply(s, "{")) {
-                return innerObject(seventh);
-            }
-            if (eq.apply(s, "[")) {
-                return list(seventh);
-            }
-            return null;
-        });
+        fifth.with(eqTransition(QUOTE_CHAR, () -> sixth))
+                .with(eqTransition(OPENING_BRACKET_CHAR, () -> innerObject(seventh)))
+                .with(eqTransition(OPENING_SQUARE_BRACKET, () -> list(seventh)));
 
-        sixth.with(s -> {
-            if (eq.apply(s, "\"")) {
-                return seventh;
-            }
-            return null;
-        });
+        sixth.with(eqTransition(QUOTE_CHAR, () -> seventh));
 
-        seventh.with(s -> {
-            if (eq.apply(s, ",")) {
-                return second;
-            }
-            return null;
-        });
+        seventh.with(eqTransition(COMMA_CHAR, () -> second))
+                .with(eqTransition(CLOSING_BRACKET_CHAR, () -> eighth));
 
-        seventh.with(s -> {
-            if (eq.apply(s, "}")) {
-                return eighth;
-            }
-            return null;
-        });
-
-        return first;
+        return first; // Starting state.
     }
 
-    public static State innerObject(final State exitState) {
-        final State second = new State();
-        final State third = new State();
-        final State fourth = new State();
-        final State fifth = new State();
-        final State sixth = new State();
-        final State seventh = new State();
+    private static State innerObject(final State exitState) {
+        final State aState = new State(); // A
+        final State bState = new State(); // B
+        final State cState = new State(); // C
+        final State dState = new State(); // D
+        final State eState = new State(); // E
+        final State fState = new State(); // F
 
-        second.with(s -> {
-            if (eq.apply(s, "\"")) {
-                return third;
-            }
-            return null;
-        });
-        second.with(s ->
-        {
-            if (eq.apply(s, "}")) {
-                return exitState;
-            }
-            return null;
-        });
+        aState.with(eqTransition(QUOTE_CHAR, () -> bState))
+                .with(eqTransition(CLOSING_BRACKET_CHAR, () -> exitState));
 
-        //Add transitions with chars 0-9 and a-z
-        for (int i = 0; i < 26; i++) {
-            if (i < 10) {
-                final String si = String.valueOf(i);
-                third.with(s ->
-                {
-                    if (eq.apply(s, si)) {
-                        return third;
-                    }
-                    return null;
+        // Add transitions for 0 to 9
+        IntStream.range(0, 10)
+                .boxed()
+                .map(String::valueOf)
+                .forEach(s -> {
+                    bState.with(eqTransition(s, () -> bState));
+                    eState.with(eqTransition(s, () -> eState));
                 });
-                sixth.with(s ->
-                {
-                    if (eq.apply(s, si)) {
-                        return sixth;
-                    }
-                    return null;
+        // Add transitions for a to z
+        IntStream.range(0, 26)
+                .boxed()
+                .map(i -> String.valueOf((char) ('a' + i)))
+                .forEach(s -> {
+                    bState.with(eqTransition(s, () -> bState));
+                    eState.with(eqTransition(s, () -> eState));
                 });
-            }
-            final String c = String.valueOf((char) ('a' + i));
-            third.with(s ->
-            {
-                if (eq.apply(s, c)) {
-                    return third;
-                }
-                return null;
-            });
-            sixth.with(s ->
-            {
-                if (eq.apply(s, c)) {
-                    return sixth;
-                }
-                return null;
-            });
-        }
 
-        third.with(s -> {
-            if (eq.apply(s, "\"")) {
-                return fourth;
-            }
-            return null;
-        });
+        bState.with(eqTransition(QUOTE_CHAR, () -> cState));
 
-        fourth.with(s ->
-        {
-            if (eq.apply(s, ":")) {
-                return fifth;
-            }
-            return null;
-        });
+        cState.with(eqTransition(COLON_CHAR, () -> dState));
 
-        fifth.with(s -> {
-            if (eq.apply(s, "\"")) {
-                return sixth;
-            }
-            return null;
-        });
-        fifth.with(s -> {
-            if (eq.apply(s, "{")) {
-                return innerObject(seventh);
-            }
-            if (eq.apply(s, "[")) {
-                return list(seventh);
-            }
-            return null;
-        });
+        dState.with(eqTransition(QUOTE_CHAR, () -> eState))
+                .with(eqTransition(OPENING_BRACKET_CHAR, () -> innerObject(fState)))
+                .with(eqTransition(OPENING_SQUARE_BRACKET, () -> list(fState)));
 
-        sixth.with(s -> {
-            if (eq.apply(s, "\"")) {
-                return seventh;
-            }
-            return null;
-        });
+        eState.with(eqTransition(QUOTE_CHAR, () -> fState));
 
-        seventh.with(s -> {
-            if (eq.apply(s, ",")) {
-                return second;
-            }
-            return null;
-        });
+        fState.with(eqTransition(COMMA_CHAR, () -> aState))
+                .with(eqTransition(CLOSING_BRACKET_CHAR, () -> exitState));
 
-        seventh.with(s -> {
-            if (eq.apply(s, "}")) {
-                return exitState;
-            }
-            return null;
-        });
-
-        return second;
+        return aState;
     }
 
-    public static State list(final State exitState) {
-        final State first = new State();
-        final State second = new State();
-        final State third = new State();
+    private static State list(final State exitState) {
+        final State x1State = new State(); // x1
+        final State x2State = new State(); // x2
+        final State x3State = new State(); // x3
 
-        first.with(s -> {
-            if (eq.apply(s, "\"")) {
-                return second;
-            }
-            if (eq.apply(s, "]")) {
-                return exitState;
-            }
-            return null;
-        });
+        x1State.with(eqTransition(QUOTE_CHAR, () -> x2State))
+                .with(eqTransition(CLOSING_SQUARE_BRACKET, () -> exitState));
 
-        //Add transitions with chars 0-9 and a-z
-        for (int i = 0; i < 26; i++) {
-            if (i < 10) {
-                final String si = String.valueOf(i);
-                second.with(s ->
-                {
-                    if (eq.apply(s, si)) {
-                        return second;
-                    }
-                    return null;
-                });
-            }
-            final String c = String.valueOf((char) ('a' + i));
-            second.with(s ->
-            {
-                if (eq.apply(s, c)) {
-                    return second;
-                }
-                return null;
-            });
-        }
+        // Add transitions for 0 to 9
+        IntStream.range(0, 10)
+                .boxed()
+                .map(String::valueOf)
+                .forEach(s -> x2State.with(eqTransition(s, () -> x2State)));
+        // Add transitions for a to z
+        IntStream.range(0, 26)
+                .boxed()
+                .map(i -> String.valueOf((char) ('a' + i)))
+                .forEach(s -> x2State.with(eqTransition(s, () -> x2State)));
 
-        second.with(s -> {
-            if (eq.apply(s, "\"")) {
-                return third;
+        x2State.with(eqTransition(QUOTE_CHAR, () -> x3State));
+
+        x3State.with(eqTransition(COMMA_CHAR, () -> x1State));
+
+        x3State.with(eqTransition(CLOSING_SQUARE_BRACKET, () -> exitState));
+
+        return x1State;
+    }
+
+    private static Function<String, State> eqTransition(final String c, final Supplier<State> stateSupplier) {
+        return s -> {
+            if (eq.apply(s, String.valueOf(c))) {
+                return stateSupplier.get();
             }
             return null;
-        });
-
-        third.with(s -> {
-            if (eq.apply(s, ",")) {
-                return first;
-            }
-            return null;
-        });
-
-        third.with(s -> {
-            if (eq.apply(s, "]")) {
-                return exitState;
-            }
-            return null;
-        });
-
-        return first;
+        };
     }
 }
