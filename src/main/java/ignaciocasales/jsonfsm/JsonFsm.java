@@ -36,22 +36,10 @@ public final class JsonFsm {
         second.with(eqTransition(QUOTE_CHAR, () -> third))
                 .with(eqTransition(CLOSING_BRACKET_CHAR, () -> eighth));
 
-        // Add transitions for 0 to 9
-        IntStream.range(0, 10)
-                .boxed()
-                .map(String::valueOf)
-                .forEach(s -> {
-                    third.with(eqTransition(s, () -> third));
-                    sixth.with(eqTransition(s, () -> sixth));
-                });
-        // Add transitions for a to z
-        IntStream.range(0, 26)
-                .boxed()
-                .map(i -> String.valueOf((char) ('a' + i)))
-                .forEach(s -> {
-                    third.with(eqTransition(s, () -> third));
-                    sixth.with(eqTransition(s, () -> sixth));
-                });
+        // Add transitions for [0-9]
+        addZeroToNineSelfTransitions(third, sixth);
+        // Add transitions for [a-z]
+        addAtoZSelfTransitions(third, sixth);
 
         third.with(eqTransition(QUOTE_CHAR, () -> fourth));
 
@@ -80,22 +68,10 @@ public final class JsonFsm {
         aState.with(eqTransition(QUOTE_CHAR, () -> bState))
                 .with(eqTransition(CLOSING_BRACKET_CHAR, () -> exitState));
 
-        // Add transitions for 0 to 9
-        IntStream.range(0, 10)
-                .boxed()
-                .map(String::valueOf)
-                .forEach(s -> {
-                    bState.with(eqTransition(s, () -> bState));
-                    eState.with(eqTransition(s, () -> eState));
-                });
-        // Add transitions for a to z
-        IntStream.range(0, 26)
-                .boxed()
-                .map(i -> String.valueOf((char) ('a' + i)))
-                .forEach(s -> {
-                    bState.with(eqTransition(s, () -> bState));
-                    eState.with(eqTransition(s, () -> eState));
-                });
+        // Add transitions for [0-9]
+        addZeroToNineSelfTransitions(bState, eState);
+        // Add transitions for [a-z]
+        addAtoZSelfTransitions(bState, eState);
 
         bState.with(eqTransition(QUOTE_CHAR, () -> cState));
 
@@ -121,16 +97,10 @@ public final class JsonFsm {
         x1State.with(eqTransition(QUOTE_CHAR, () -> x2State))
                 .with(eqTransition(CLOSING_SQUARE_BRACKET, () -> exitState));
 
-        // Add transitions for 0 to 9
-        IntStream.range(0, 10)
-                .boxed()
-                .map(String::valueOf)
-                .forEach(s -> x2State.with(eqTransition(s, () -> x2State)));
-        // Add transitions for a to z
-        IntStream.range(0, 26)
-                .boxed()
-                .map(i -> String.valueOf((char) ('a' + i)))
-                .forEach(s -> x2State.with(eqTransition(s, () -> x2State)));
+        // Add transitions for [0-9]
+        addZeroToNineSelfTransitions(x2State);
+        // Add transitions for [a-z]
+        addAtoZSelfTransitions(x2State);
 
         x2State.with(eqTransition(QUOTE_CHAR, () -> x3State));
 
@@ -148,5 +118,27 @@ public final class JsonFsm {
             }
             return null;
         };
+    }
+
+    private static void addZeroToNineSelfTransitions(final State... state) {
+        IntStream.range(0, 10)
+                .boxed()
+                .map(String::valueOf)
+                .forEach(value -> {
+                    for (State s : state) {
+                        s.with(eqTransition(value, () -> s));
+                    }
+                });
+    }
+
+    private static void addAtoZSelfTransitions(final State... state) {
+        IntStream.range(0, 26)
+                .boxed()
+                .map(i -> String.valueOf((char) ('a' + i)))
+                .forEach(value -> {
+                    for (State s : state) {
+                        s.with(eqTransition(value, () -> s));
+                    }
+                });
     }
 }
