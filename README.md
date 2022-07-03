@@ -4,9 +4,11 @@
 
 This project was developed for the subject of Discrete Mathematics at the Universidad Atlántida Argentina.
 
-### Model used by this non-deterministic finite state automata (NFA)
+### Model used by this non-deterministic finite automaton (NFA)
 
 ![transitions](docs/transitions.svg)
+
+* Note: This does not cover the full JSON specification.
 
 ## How to run the project
 
